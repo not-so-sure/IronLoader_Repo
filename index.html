@@ -811,7 +811,7 @@ html, body {
     </main>
 
   <script type="module">
-    // ===== Console logging helpers =====
+    // Console logging helpers
 
     async function loadSettings() {
       if (typeof window.iron === "undefined") return;
@@ -852,7 +852,7 @@ html, body {
       minLogLevel: "INFO"
     };
 
-    // ===== Logging (single source of truth) =====
+    // Logging
     const LOGS = [];
     const MAX_LOGS = 800;
 
@@ -960,7 +960,6 @@ html, body {
         } catch (e) {
           log(`Module error (${m.name}): ${e.message}`, "ERROR");
 
-          // Dynamic alert UI (only if container exists)
           if (container) {
             const alert = document.createElement("div");
             alert.className = "alert";
