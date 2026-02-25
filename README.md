@@ -8,20 +8,29 @@ Fetches repo from json
 https://nodejs.org
 
 After installing run these commands in command prompt:
+
 node -v
+
 npm -v
 
 You should have strings of numbers outputted
 
-## Create a new foler somewhere and cd to it
+## Create a new folder somewhere and cd to it
 then type in the console:
+
 npm init -y
 
-this smakes the package.json that you will need to overwrite / replace
+this makes the package.json that you will need to overwrite / replace
 
 Then run:
+
 npm install electron --save-dev
 
 And then paste the downloaded files into the new folder you created.
+
 It should be as simple as running: 
+
 npm start 
+
+
+If this doesnt work, please contact me
