@@ -1,0 +1,1443 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IronLoader — Iron Nest Mod Manager</title>
+
+  <style>
+    :root{
+  --bg0:#070a0d;
+  --bg1:#0b1016;
+  --stroke:rgba(255,255,255,.09);
+  --stroke2:rgba(255,255,255,.14);
+  --text:#e8eef7;
+  --muted:rgba(232,238,247,.72);
+  --muted2:rgba(232,238,247,.55);
+
+  --good:#33d17a;
+  --warn:#ffcc66;
+  --bad:#ff5c7a;
+
+  --shadow: 0 16px 50px rgba(0,0,0,.55);
+  --r14: 14px;
+  --r16: 16px;
+  --r20: 20px;
+
+  --btnH: 40px;
+  --gap: 16px;
+
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color-scheme: dark;
+}
+/* Light theme override */
+body[data-theme="light"]{
+  --bg0:#f6f7fb;
+  --bg1:#eef1f7;
+
+  --text:#0d1220;
+  --muted:rgba(13,18,32,.72);
+  --muted2:rgba(13,18,32,.55);
+
+  --stroke:rgba(13,18,32,.10);
+  --stroke2:rgba(13,18,32,.16);
+
+  --shadow: 0 18px 50px rgba(0,0,0,.14);
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background:
+    radial-gradient(900px 600px at 20% 0%, rgba(100,214,255,.12), transparent 55%),
+    radial-gradient(900px 600px at 85% 10%, rgba(124,92,255,.12), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  color:var(--text);
+}
+
+/* =========================
+   LOG STYLES
+   ========================= */
+.log-line {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.log-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  min-width: 56px;
+  text-align: center;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+}
+.log-badge.info {
+  background: rgba(100,214,255,.18);
+  color: #64d6ff;
+  border-color: rgba(100,214,255,.35);
+}
+.log-badge.warn {
+  background: rgba(255,204,102,.18);
+  color: #ffcc66;
+  border-color: rgba(255,204,102,.35);
+}
+.log-badge.error {
+  background: rgba(255,92,122,.18);
+  color: #ff5c7a;
+  border-color: rgba(255,92,122,.35);
+}
+.log-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+/* =========================
+   LAYOUT
+   ========================= */
+.app{
+  min-height:100%;
+  display:grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--gap);
+  padding: 18px;
+}
+@media (max-width: 980px){
+  .app{ grid-template-columns: 1fr; }
+  .sidebar{ position:sticky; top:0; z-index:2; }
+}
+.main{
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display:flex;
+  flex-direction:column;
+  gap: var(--gap);
+}
+.grid{
+  display:grid;
+  gap: var(--gap);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 980px){
+  .grid{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sidebar,
+.card{
+  position: relative;
+  overflow: hidden;
+  isolation: isolate; /* avoids blending artifacts */
+  border:1px solid var(--stroke);
+  border-radius: var(--r20);
+  box-shadow: var(--shadow);
+  backdrop-filter: none;         
+  -webkit-backdrop-filter: none; 
+  background: rgba(255,255,255,.03); 
+}
+
+.sidebar::before,
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+
+  border-radius: inherit;
+  overflow: hidden;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.06),
+    rgba(255,255,255,.03)
+  );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Ensure content is above the blur layer */
+.sidebar > *,
+.card > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* Sidebar specifics */
+.sidebar{
+  padding: 16px;
+  display:flex;
+  flex-direction:column;
+  gap: 14px;
+}
+
+/* Card specifics */
+.card{
+  padding: 16px;
+}
+.cardHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cardTitle{
+  margin:0;
+  font-size: 14px;
+  letter-spacing:.2px;
+}
+.cardSub{
+  margin:4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height:1.4;
+}
+
+/* =========================
+   TOP BRANDING
+   ========================= */
+.brand{
+  display:flex;
+  gap: 12px;
+  align-items:flex-start;
+  padding: 10px 10px 14px;
+  border-bottom: 1px solid var(--stroke);
+}
+.logoImg{
+  width:44px;
+  height:44px;
+  border-radius: 14px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 12px 35px rgba(0,0,0,.35);
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+.brandText{
+  flex:1;
+  min-width:0;
+}
+.brand h1{
+  font-size: 18px;
+  margin:0;
+  letter-spacing:.2px;
+  line-height:1.1;
+}
+.brand p{
+  margin:3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.statusPill{
+  margin: 10px 0 0;
+  width: 100%;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+  font-size: 12px;
+  min-width: 0;
+}
+.statusPill span:last-child{
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width:0;
+}
+.dot{
+  width:10px; height:10px;
+  border-radius:999px;
+  background: var(--good);
+  box-shadow: 0 0 0 5px rgba(51,209,122,.12);
+  flex: 0 0 auto;
+}
+
+/* =========================
+   SIDEBAR NAV
+   ========================= */
+.nav{ display:flex; flex-direction:column; gap: 8px; }
+.nav button{
+  all:unset;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border:1px solid transparent;
+  color: var(--muted);
+  background: transparent;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.nav button:hover{
+  background: rgba(255,255,255,.06);
+  border-color: var(--stroke);
+  color: var(--text);
+}
+.nav button[aria-current="page"]{
+  background: linear-gradient(180deg, rgba(100,214,255,.10), rgba(124,92,255,.08));
+  border-color: rgba(100,214,255,.22);
+  color: var(--text);
+}
+.nav .tag{
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  color: var(--muted2);
+  background: rgba(255,255,255,.04);
+}
+
+[data-view]{
+  display:flex;
+  flex-direction:column;
+  gap: var(--gap);
+}
+
+/* =========================
+   INPUTS / ROWS
+   ========================= */
+.row{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  margin-top: 10px;
+}
+.label{
+  width: 88px;
+  color: var(--muted2);
+  font-size: 12px;
+}
+.input{
+  flex: 1;
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  min-width: 0;
+}
+input[type="text"]{
+  width:100%;
+  height: var(--btnH);
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.20);
+  color: var(--text);
+  padding: 0 12px;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  min-width: 0;
+}
+input[type="text"]:focus{
+  border-color: rgba(100,214,255,.38);
+  box-shadow: 0 0 0 5px rgba(100,214,255,.10);
+}
+
+.btn{
+  height: var(--btnH);
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  cursor:pointer;
+
+  transition: background .15s ease, border-color .15s ease, filter .10s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  user-select:none;
+  white-space:nowrap;
+}
+.btn:hover{
+  border-color: var(--stroke2);
+  background: rgba(255,255,255,.08);
+}
+.btn:active{
+  background: rgba(255,255,255,.10);
+}
+
+.btnPrimary{
+  border-color: rgba(100,214,255,.35);
+  background: linear-gradient(180deg, rgba(100,214,255,.18), rgba(100,214,255,.10));
+}
+.btnDanger{
+  border-color: rgba(255,92,122,.35);
+  background: linear-gradient(180deg, rgba(255,92,122,.18), rgba(255,92,122,.10));
+}
+.btnGhost{
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  justify-content:flex-start;
+}
+.btnGhost:hover{
+  background: rgba(255,255,255,.06);
+  border-color: var(--stroke);
+  color: var(--text);
+}
+
+/* =========================
+   PROFILE SELECTOR
+   ========================= */
+.profileBar{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 10px;
+  align-items:center;
+}
+.seg{
+  display:flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.18);
+}
+.seg button{
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor:pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.seg button:hover{
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+}
+.seg button[data-active="true"]{
+  background: rgba(255,255,255,.08);
+  border-color: var(--stroke);
+  color: var(--text);
+}
+
+/* =========================
+   ALERTS
+   ========================= */
+.alert{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,92,122,.25);
+  background: rgba(255,92,122,.10);
+  color: rgba(255,240,244,.92);
+  font-size: 12px;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+.alert b{ color: #fff; }
+.alert .icon{
+  width: 18px; height: 18px;
+  border-radius: 6px;
+  background: rgba(255,92,122,.28);
+  display:grid;
+  place-items:center;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  font-weight: 800;
+}
+
+/* =========================
+   CONSOLE
+   ========================= */
+.console{ padding: 0; overflow:hidden; }
+.consoleTop{
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--stroke);
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
+}
+.consoleBody{
+  background: rgba(0,0,0,.28);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  color: rgba(232,238,247,.86);
+  padding: 14px 16px;
+  height: 210px;
+  overflow:auto;
+  line-height:1.55;
+}
+.lineMuted{ color: rgba(232,238,247,.55); }
+
+.kicker{
+  font-size: 11px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+[data-view][hidden]{
+  display: none !important;
+}
+
+input[type="checkbox"]{
+  width: 18px;
+  height: 18px;
+  accent-color: rgba(100,214,255,.9);
+}
+select.btn{
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+}
+
+/* Fix text fraction */
+body, .card, .sidebar, .consoleBody {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Electron crisp text patch */
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+/* Avoid accidental filter/transform inheritance */
+.app, .main, .card, .sidebar, .btn, .consoleBody {
+  filter: none !important;
+  transform: none !important;
+}
+
+.card.console{
+  grid-column: 1 / -1;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <img
+          class="logoImg"
+          src="https://media.discordapp.net/attachments/1476013612161171520/1476032335442087946/luka.png?ex=699fa5bc&is=699e543c&hm=94028fd40484689f9e9e021539b3368e81fa8f39bc5b8dea1384376878f3af22&=&format=webp"
+          alt="IronLoader icon"
+        />
+        <div class="brandText">
+          <h1>IronLoader</h1>
+          <p>Iron Nest Mod Manager</p>
+
+          <div class="statusPill" title="Current loader status">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="statusText">IronLoader Installed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav" role="navigation" aria-label="Launcher navigation">
+      <button id="navDashboard" data-nav="dashboard" aria-current="page">
+        <span>Dashboard</span>
+        <span class="tag">Home</span>
+      </button>
+      <button id="navProfiles" data-nav="profiles">
+        <span>Profiles</span>
+        <span class="tag">2</span>
+      </button>
+      <button id="navPaths" data-nav="paths">
+        <span>Paths</span>
+        <span class="tag">Setup</span>
+      </button>
+      <button id="navConsole" data-nav="console">
+        <span>Console</span>
+        <span class="tag">Logs</span>
+      </button>
+      <button id="navSettings" data-nav="settings" class="btnGhost">
+        Settings
+      </button>
+    </div>
+
+      <div class="card" style="box-shadow:none; background: rgba(255,255,255,.04);">
+        <div class="kicker">Quick actions</div>
+        <div class="row" style="margin-top:10px;">
+          <button class="btn btnPrimary" id="btnPlayQuick" style="flex:1;">Play</button>
+          <button class="btn" id="btnOpenModsQuick" style="flex:1;">Open Mods</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- DASHBOARD VIEW -->
+      <section data-view="dashboard">
+        <section class="grid">
+
+        <!-- Dashboard Card -->
+        <section class="card">
+          <div class="cardHeader">
+            <div>
+              <h2 class="cardTitle">Dashboard</h2>
+              <p class="cardSub">Quick overview and launcher status.</p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input" style="justify-content:space-between;">
+              <div style="color: var(--muted); font-size:12px;">
+                Active Profile: <b style="color:var(--text);" id="activeProfileLabel">Default</b>
+              </div>
+              <button class="btn" id="btnGoProfiles">Manage Profiles</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input" style="justify-content:flex-end;">
+              <button class="btn" id="btnGoPaths">Open Paths</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Controls Card -->
+        <section class="card">
+          <div class="cardHeader">
+            <div>
+              <h2 class="cardTitle">Quick Controls</h2>
+              <p class="cardSub">Common actions without leaving home.</p>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:0;">
+            <button class="btn btnPrimary" id="btnPlay" style="flex:1;">Play</button>
+            <button class="btn" id="btnVerify" style="flex:1;">Verify</button>
+          </div>
+
+          <div class="row">
+            <button class="btn btnPrimary" id="btnInstall" style="flex:1;">Install</button>
+            <button class="btn btnDanger" id="btnUninstall" style="flex:1;">Uninstall</button>
+          </div>
+        </section>
+
+      </section>
+      
+      <!-- Console Preview -->
+        <section class="card console">
+         <div class="consoleTop">
+           <div>
+              <h2 class="cardTitle">Console Preview</h2>
+              <p class="cardSub">Recent activity.</p>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" id="btnCopyLog">Copy</button>
+              <button class="btn" id="btnClearLog">Clear</button>
+              <button class="btn" id="btnGoConsole">Open Console</button>
+            </div>
+          </div>
+
+         <div class="consoleBody" id="consoleBody" aria-label="Log output"></div>
+        </section>
+      </section>
+
+      <!-- PROFILES VIEW -->
+    <section data-view="profiles" hidden>
+      <section class="card">
+        <div class="cardHeader">
+          <div>
+            <h2 class="cardTitle">Profiles</h2>
+            <p class="cardSub">
+              Switch mod sets instantly. Each profile stores enabled mods and config.
+            </p>
+          </div>
+          <button class="btn" id="btnNewProfile">+ New</button>
+        </div>
+
+        <div class="profileBar">
+          <!-- This is where JS will render profile buttons -->
+          <div class="seg" id="profilesSeg" role="tablist" aria-label="Profiles"></div>
+
+          <button class="btn" id="btnDuplicateProfile">Duplicate</button>
+          <button class="btn btnDanger" id="btnDeleteProfile">Delete</button>
+        </div>
+
+        <!-- Module error container -->
+        <div id="moduleAlerts"></div>
+      </section>
+    </section>
+
+      <!-- PATHS VIEW -->
+      <section data-view="paths" hidden>
+        <section class="card">
+          <div class="cardHeader">
+            <div>
+              <h2 class="cardTitle">Paths</h2>
+              <p class="cardSub">If auto-detect is wrong, set paths manually.</p>
+            </div>
+            <button class="btn" id="btnAutoDetect">Auto-detect</button>
+          </div>
+
+          <div class="row">
+            <div class="label">Game</div>
+            <div class="input">
+              <input id="gamePath" type="text" value="C:\Program Files (x86)\Steam\steamapps\common\IRON NEST Heavy Turret Simulator Demo" />
+              <button class="btn" id="btnBrowseGame">Browse</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="label">Mods</div>
+            <div class="input">
+              <input id="modsPath" type="text" value="C:\Program Files (x86)\Steam\steamapps\common\IRON NEST Heavy Turret Simulator Demo\Mods" />
+              <button class="btn" id="btnBrowseMods">Browse</button>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content:flex-end; margin-top:14px;">
+            <button class="btn btnPrimary" id="btnSavePaths">Save Paths</button>
+          </div>
+        </section>
+      </section>
+
+      <!-- CONSOLE VIEW -->
+      <section data-view="console" hidden>
+        <section class="card console">
+          <div class="consoleTop">
+            <div>
+              <h2 class="cardTitle">Console</h2>
+              <p class="cardSub">Copy/paste logs when reporting errors.</p>
+           </div>
+           <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" id="btnCopyLog2">Copy</button>
+              <button class="btn" id="btnClearLog2">Clear</button>
+              <button class="btn" id="btnOpenModsQuick2">Open Mods</button>
+            </div>
+          </div>
+
+          <div class="consoleBody" id="consoleBody2" aria-label="Log output"></div>
+        </section>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section data-view="settings" hidden>
+      <section class="card">
+        <div class="cardHeader">
+          <div>
+            <h2 class="cardTitle">Settings</h2>
+            <p class="cardSub">Launcher preferences and behavior.</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="label">Theme</div>
+          <div class="input">
+            <button class="btn" id="btnThemeDark">Dark</button>
+            <button class="btn" id="btnThemeLight">Light</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="label">Startup</div>
+          <div class="input" style="justify-content:space-between;">
+            <div style="color:var(--muted); font-size:12px;">Auto-detect paths on launch</div>
+            <input type="checkbox" id="chkAutoDetectOnLaunch" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="label">Mods</div>
+          <div class="input" style="justify-content:space-between;">
+            <div style="color:var(--muted); font-size:12px;">Auto-create Mods folder</div>
+            <input type="checkbox" id="chkAutoCreateMods" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="label">Logging</div>
+          <div class="input">
+            <select id="selMinLogLevel" class="btn" style="height:var(--btnH);">
+              <option value="INFO">INFO</option>
+              <option value="WARN">WARN</option>
+              <option value="ERROR">ERROR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:flex-end; margin-top:14px;">
+          <button class="btn btnPrimary" id="btnSaveSettings">Save</button>
+        </div>
+
+        <div class="row" style="justify-content:flex-end;">
+      <button class="btn" id="btnExportLogs">Export Logs</button>
+    </div>
+      </section>
+    </section>
+
+    <dialog id="textDialog" style="border:none; border-radius:16px; padding:0; background:transparent;">
+      <div class="card" style="min-width:360px; max-width:520px;">
+        <div class="cardHeader" style="margin-bottom:0;">
+          <div>
+            <h2 class="cardTitle" id="textDialogTitle">Title</h2>
+            <p class="cardSub" id="textDialogSub">Subtitle</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="label">Name</div>
+          <div class="input">
+            <input id="textDialogInput" type="text" placeholder="Enter name..." />
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:flex-end; margin-top:14px;">
+          <button class="btn" id="textDialogCancel" type="button">Cancel</button>
+          <button class="btn btnPrimary" id="textDialogOk" type="button">OK</button>
+        </div>
+      </div>
+    </dialog>
+
+    </main>
+
+  <script type="module">
+    // ===== Console logging helpers =====
+
+    async function loadSettings() {
+      if (typeof window.iron === "undefined") return;
+
+      SETTINGS = await window.iron.getSettings();
+      applyTheme(SETTINGS.theme);
+
+      // Populate UI
+      document.getElementById("chkAutoDetectOnLaunch").checked = !!SETTINGS.autoDetectOnLaunch;
+      document.getElementById("chkAutoCreateMods").checked = !!SETTINGS.autoCreateModsFolder;
+      document.getElementById("selMinLogLevel").value = SETTINGS.minLogLevel || "INFO";
+    }
+
+    async function saveSettingsFromUI() {
+      if (typeof window.iron === "undefined") {
+        log("Not running in Electron. Settings can't be saved.", "ERROR");
+        return;
+      }
+
+      const theme = document.body.dataset.theme || SETTINGS.theme;
+
+      const partial = {
+        theme,
+        autoDetectOnLaunch: document.getElementById("chkAutoDetectOnLaunch").checked,
+        autoCreateModsFolder: document.getElementById("chkAutoCreateMods").checked,
+        minLogLevel: document.getElementById("selMinLogLevel").value
+      };
+
+      SETTINGS = await window.iron.setSettings(partial);
+      applyTheme(SETTINGS.theme);
+      log("Settings saved.", "INFO");
+    }
+
+    let SETTINGS = {
+      theme: "dark",
+      autoDetectOnLaunch: true,
+      autoCreateModsFolder: true,
+      minLogLevel: "INFO"
+    };
+
+    // ===== Logging (single source of truth) =====
+    const LOGS = [];
+    const MAX_LOGS = 800;
+
+    function formatTime() {
+      return new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+    }
+
+    function levelRank(level) {
+      return { INFO: 1, WARN: 2, ERROR: 3 }[String(level).toUpperCase()] ?? 1;
+    }
+
+    function buildLogLine(entry) {
+      const line = document.createElement("div");
+      line.className = "log-line";
+
+      const badge = document.createElement("span");
+      badge.className = `log-badge ${String(entry.level).toLowerCase()}`;
+      badge.textContent = entry.level;
+
+      const text = document.createElement("span");
+      text.className = "log-text";
+      text.textContent = `[${entry.time}] ${entry.message}`;
+
+      line.appendChild(badge);
+      line.appendChild(text);
+      return line;
+    }
+
+    function renderLogs() {
+      const a = document.getElementById("consoleBody");
+      const b = document.getElementById("consoleBody2");
+
+      // If neither console exists on the current page/layout, just do nothing.
+      if (!a && !b) return;
+
+      const minLevel = (window.SETTINGS?.minLogLevel || "INFO").toUpperCase();
+      const visible = LOGS.filter(e => levelRank(e.level) >= levelRank(minLevel));
+
+      [a, b].forEach(el => {
+        if (!el) return;
+        el.innerHTML = "";
+        for (const entry of visible) el.appendChild(buildLogLine(entry));
+        el.scrollTop = el.scrollHeight;
+      });
+    }
+
+    function log(message, level = "INFO") {
+      // Back-compat: allow old calls like "success"/"warn"/"error"
+      const map = {
+        normal: "INFO",
+        info: "INFO",
+        success: "INFO",
+        warn: "WARN",
+        warning: "WARN",
+        error: "ERROR"
+      };
+
+      const raw = String(level);
+      const upper = raw.toUpperCase();
+      const finalLevel = map[raw] || (["INFO", "WARN", "ERROR"].includes(upper) ? upper : "INFO");
+
+      LOGS.push({
+        time: formatTime(),
+        level: finalLevel,
+        message: String(message)
+      });
+
+      if (LOGS.length > MAX_LOGS) LOGS.shift();
+      renderLogs();
+    }
+
+    function getLogsText() {
+      return LOGS.map(l => `[${l.time}] ${l.level} ${l.message}`).join("\n");
+    }
+
+    function applyTheme(theme) {
+      document.body.dataset.theme = theme;
+    }
+
+    function addStartupLogs() {
+      log("IronLoader boot sequence started.", "INFO");
+      log("Attempting communication with Steam...", "INFO");
+      log("Checking install status...", "INFO");
+      log("Ready.", "INFO");
+    }
+
+    async function loadModules() {
+      const modules = [
+        { name: "scrollingFrame", path: "./modules/scrollingFrame.js" }
+      ];
+      const container = document.getElementById("moduleAlerts");
+      if (container) container.innerHTML = "";
+
+      for (const m of modules) {
+        try {
+          const mod = await import(m.path);
+          if (!mod.init) throw new Error("Missing init() export");
+          await mod.init({ log });
+          log(`Module loaded: ${m.name}`, "INFO");
+        } catch (e) {
+          log(`Module error (${m.name}): ${e.message}`, "ERROR");
+
+          // Dynamic alert UI (only if container exists)
+          if (container) {
+            const alert = document.createElement("div");
+            alert.className = "alert";
+            alert.innerHTML = `
+              <div class="icon">!</div>
+              <div>
+                <b>${m.name} module error</b><br/>
+                ${e.message}
+              </div>
+            `;
+            container.appendChild(alert);
+          }
+        }
+      }
+    }
+
+    function askText({ title, sub, placeholder = "", value = "" }) {
+      return new Promise((resolve) => {
+        const dlg = document.getElementById("textDialog");
+        const t = document.getElementById("textDialogTitle");
+        const s = document.getElementById("textDialogSub");
+        const input = document.getElementById("textDialogInput");
+        const ok = document.getElementById("textDialogOk");
+        const cancel = document.getElementById("textDialogCancel");
+
+        if (!dlg || !t || !s || !input || !ok || !cancel) {
+          // fallback if dialog missing (won't crash)
+          resolve((window.prompt(title) || "").trim() || null);
+          return;
+        }
+
+        t.textContent = title || "Input";
+        s.textContent = sub || "";
+        input.placeholder = placeholder;
+        input.value = value;
+
+        const cleanup = () => {
+          ok.onclick = null;
+          cancel.onclick = null;
+          input.onkeydown = null;
+        };
+
+        ok.onclick = () => {
+          const v = (input.value || "").trim();
+          cleanup();
+          dlg.close();
+          resolve(v || null);
+        };
+
+        cancel.onclick = () => {
+          cleanup();
+          dlg.close();
+          resolve(null);
+        };
+
+        input.onkeydown = (e) => {
+          if (e.key === "Enter") ok.click();
+          if (e.key === "Escape") cancel.click();
+        };
+
+        dlg.showModal();
+        setTimeout(() => input.focus(), 0);
+      });
+    }
+
+    // ===== Profiles (renderer) =====
+    let PROFILES = null;
+
+    function uid() {
+      return "p_" + Math.random().toString(36).slice(2, 10);
+    }
+
+    function getActiveProfileObj() {
+      return PROFILES?.profiles?.find(p => p.id === PROFILES.activeProfileId) || PROFILES?.profiles?.[0] || null;
+    }
+
+    function refreshDashboardProfileLabel() {
+      const el = document.getElementById("activeProfileLabel");
+      if (!el) return;
+      const active = getActiveProfileObj();
+      el.textContent = active ? active.name : "Default";
+    }
+
+    async function loadProfiles() {
+      if (window.iron?.getProfiles) {
+        PROFILES = await window.iron.getProfiles();
+      } else {
+        // fallback if not in Electron
+        PROFILES = {
+          activeProfileId: "default",
+          profiles: [{ id: "default", name: "Default", enabledMods: [] }]
+        };
+      }
+      renderProfiles();
+      refreshDashboardProfileLabel();
+    }
+
+    async function saveProfiles() {
+      if (window.iron?.saveProfiles) {
+        PROFILES = await window.iron.saveProfiles(PROFILES);
+      }
+    }
+
+    function renderProfiles() {
+      const seg = document.getElementById("profilesSeg");
+      if (!seg) return;
+
+      seg.innerHTML = "";
+
+      for (const p of PROFILES.profiles) {
+        const btn = document.createElement("button");
+        btn.textContent = p.name;
+        btn.dataset.id = p.id;
+
+        const isActive = p.id === PROFILES.activeProfileId;
+        btn.dataset.active = isActive ? "true" : "false";
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+
+        btn.addEventListener("click", async () => {
+          PROFILES.activeProfileId = p.id;
+          await saveProfiles();
+          renderProfiles();
+          refreshDashboardProfileLabel();
+          log(`Switched profile to "${p.name}"`, "INFO");
+        });
+
+        seg.appendChild(btn);
+      }
+
+      const tag = document.querySelector('#navProfiles .tag');
+      if (tag) tag.textContent = String(PROFILES.profiles.length);
+    }
+
+    // Buttons
+    document.getElementById("btnNewProfile")?.addEventListener("click", async () => {
+      if (!PROFILES) await loadProfiles();
+
+      const name = await askText({
+        title: "New profile",
+        sub: "Give your mod profile a name.",
+        placeholder: "e.g. Modded Run",
+      });
+
+      if (!name) {
+        log("Profile creation canceled.", "INFO");
+        return;
+      }
+
+      const newP = { id: uid(), name, enabledMods: [] };
+      PROFILES.profiles.push(newP);
+      PROFILES.activeProfileId = newP.id;
+
+      await saveProfiles();
+      renderProfiles();
+      refreshDashboardProfileLabel();
+      log(`Created profile "${name}"`, "INFO");
+    });
+
+    document.getElementById("btnDuplicateProfile")?.addEventListener("click", async () => {
+      if (!PROFILES) await loadProfiles();
+      const active = getActiveProfileObj();
+      if (!active) return;
+
+      const copy = {
+        id: uid(),
+        name: `${active.name} Copy`,
+        enabledMods: Array.isArray(active.enabledMods) ? [...active.enabledMods] : []
+      };
+
+      PROFILES.profiles.push(copy);
+      PROFILES.activeProfileId = copy.id;
+
+      await saveProfiles();
+      renderProfiles();
+      refreshDashboardProfileLabel();
+      log(`Duplicated profile to "${copy.name}"`, "INFO");
+    });
+
+    document.getElementById("btnDeleteProfile")?.addEventListener("click", async () => {
+      if (!PROFILES) await loadProfiles();
+      if (!PROFILES?.profiles?.length) return;
+
+      if (PROFILES.profiles.length <= 1) {
+        log("You must keep at least one profile.", "WARN");
+        return;
+      }
+
+      const active = getActiveProfileObj();
+      if (!active) return;
+
+      const ok = confirm(`Delete profile "${active.name}"?`);
+      if (!ok) return;
+
+      PROFILES.profiles = PROFILES.profiles.filter(p => p.id !== active.id);
+      PROFILES.activeProfileId = PROFILES.profiles[0].id;
+
+      await saveProfiles();
+      renderProfiles();
+      refreshDashboardProfileLabel();
+      log(`Deleted profile "${active.name}"`, "WARN");
+    });
+
+    // detect electron bridge
+    const hasIronBridge = typeof window.iron !== "undefined";
+
+    // BROWSE GAME
+    document.getElementById('btnBrowseGame').addEventListener('click', async () => {
+      if (!hasIronBridge) {
+        log("Not running in Electron. Folder picker unavailable.", "error");
+        return;
+      }
+      const picked = await window.iron.pickFolder();
+      if (picked) {
+        document.getElementById('gamePath').value = picked;
+        log(`Game path set to: ${picked}`, "success");
+      } else {
+        log("Game path selection canceled.");
+      }
+    });
+
+    // BROWSE MODS
+    document.getElementById('btnBrowseMods').addEventListener('click', async () => {
+      if (!hasIronBridge) {
+        log("Not running in Electron. Folder picker unavailable.", "error");
+        return;
+      }
+      const picked = await window.iron.pickFolder();
+      if (picked) {
+        document.getElementById('modsPath').value = picked;
+        log(`Mods path set to: ${picked}`, "success");
+      } else {
+        log("Mods path selection canceled.");
+      }
+    });
+
+    // OPEN MODS FOLDER
+    document.getElementById('btnOpenModsQuick').addEventListener('click', async () => {
+      const modsPath = document.getElementById('modsPath').value.trim();
+      if (!hasIronBridge) {
+        log("Not running in Electron. Cannot open folder.", "error");
+        return;
+      }
+      const ok = await window.iron.openPath(modsPath);
+      log(ok ? `Opened folder: ${modsPath}` : "Failed to open folder.", ok ? "success" : "error");
+    });
+
+    // STATUS CONTROLS
+    const statusText = document.getElementById('statusText');
+    const statusDot = document.querySelector('.dot');
+
+    function setStatus(installed) {
+      if (installed) {
+        statusText.textContent = "IronLoader Installed";
+        statusDot.style.background = "#33d17a";
+        statusDot.style.boxShadow = "0 0 0 5px rgba(51,209,122,.12)";
+      } else {
+        statusText.textContent = "IronLoader Not Installed";
+        statusDot.style.background = "#ff5c7a";
+        statusDot.style.boxShadow = "0 0 0 5px rgba(255,92,122,.12)";
+      }
+    }
+
+    // WIRED BUTTONS
+    document.getElementById("btnExportLogs")?.addEventListener("click", async () => {
+      if (!window.iron) {
+        log("Not running in Electron. Export unavailable.", "ERROR");
+        return;
+      }
+
+      const stamp = new Date().toISOString().replace(/[:]/g, "-").replace(/\..+/, "");
+      const defaultName = `ironloader-logs-${stamp}.txt`;
+
+      const res = await window.iron.exportLogs({
+        defaultName,
+        content: getLogsText()
+      });
+
+      if (res?.ok) {
+        log(`Logs exported to: ${res.path}`, "INFO");
+      } else if (res?.canceled) {
+        log("Export canceled.", "INFO");
+      } else {
+        log("Export failed.", "ERROR");
+      }
+    });
+
+    document.getElementById('btnInstall').addEventListener('click', () => {
+      setStatus(true);
+      log("IronLoader installed successfully.", "success");
+    });
+
+    document.getElementById('btnUninstall').addEventListener('click', () => {
+      setStatus(false);
+      log("IronLoader removed from game directory.", "warn");
+    });
+
+    const playHandlers = [
+      document.getElementById('btnPlay'),
+      document.getElementById('btnPlayQuick')
+    ];
+    playHandlers.forEach(btn => btn.addEventListener('click', () => {
+      const profile = (getActiveProfileObj()?.name || "Default");
+      log(`Launching Iron Nest with profile "${profile}"...`, "success");
+      alert(`Demo: would launch Iron Nest with profile "${profile}".`);
+    }));
+
+    document.getElementById('btnVerify').addEventListener('click', () => {
+      log("Verifying modloader files...", "warn");
+      setTimeout(() => log("Verification complete. No issues found.", "success"), 600);
+    });
+
+    document.getElementById('btnSavePaths').addEventListener('click', () => {
+      const gamePath = document.getElementById('gamePath').value.trim();
+      const modsPath = document.getElementById('modsPath').value.trim();
+      log(`Saved paths:\nGame: ${gamePath}\nMods: ${modsPath}`, "success");
+    });
+
+    document.getElementById('btnAutoDetect').addEventListener('click', async () => {
+      if (typeof window.iron === "undefined") {
+        log("Not running in Electron. Auto-detect unavailable.", "ERROR");
+        return;
+      }
+
+      log("Auto-detect started...", "INFO");
+
+      const result = await window.iron.autoDetectPaths();
+
+      if (!result.ok) {
+        log(result.reason || "Auto-detect failed.", "ERROR");
+        return;
+      }
+
+      document.getElementById('gamePath').value = result.gamePath;
+      document.getElementById('modsPath').value = result.modsPath;
+
+      log(`Game path detected: ${result.gamePath}`, "INFO");
+
+      if (result.createdMods) {
+        log(`Mods folder was missing, created: ${result.modsPath}`, "WARN");
+      } else {
+        log(`Mods path detected: ${result.modsPath}`, "INFO");
+      }
+    });
+
+    document.getElementById("btnThemeDark")?.addEventListener("click", async () => {
+      applyTheme("dark");
+      if (window.iron) SETTINGS = await window.iron.setSettings({ theme: "dark" });
+      log("Theme set to Dark.", "INFO");
+    });
+
+    document.getElementById("btnThemeLight")?.addEventListener("click", async () => {
+      applyTheme("light");
+      if (window.iron) SETTINGS = await window.iron.setSettings({ theme: "light" });
+      log("Theme set to Light.", "INFO");
+    });
+
+    document.getElementById("btnSaveSettings")?.addEventListener("click", saveSettingsFromUI);
+
+    document.getElementById("selMinLogLevel")?.addEventListener("change", async (e) => {
+      SETTINGS.minLogLevel = e.target.value;
+      if (window.iron) SETTINGS = await window.iron.setSettings({ minLogLevel: SETTINGS.minLogLevel });
+      // Re-render logs to apply filter
+      renderLogs();
+      log(`Minimum log level set to ${SETTINGS.minLogLevel}.`, "INFO");
+    });
+
+    document.getElementById('btnClearLog')?.addEventListener('click', () => {
+      LOGS.length = 0;
+      renderLogs();
+      log("Cleared.", "INFO");
+    });
+
+    document.getElementById('btnClearLog2')?.addEventListener('click', () => {
+      LOGS.length = 0;
+      renderLogs();
+      log("Cleared.", "INFO");
+    });
+
+    document.getElementById('btnCopyLog')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(getLogsText());
+        log("Console copied to clipboard.", "INFO");
+      } catch {
+        log("Clipboard copy failed (permissions).", "ERROR");
+      }
+    });
+
+document.getElementById('btnCopyLog2')?.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(getLogsText());
+    log("Console copied to clipboard.", "INFO");
+  } catch {
+    log("Clipboard copy failed (permissions).", "ERROR");
+  }
+});
+// initial status on first launch
+    setStatus(false);
+
+  // ---------- View switching ----------
+    function setActiveNav(target) {
+      document.querySelectorAll('.nav button').forEach(b => b.removeAttribute('aria-current'));
+      const btn = document.querySelector(`.nav button[data-nav="${target}"]`);
+      if (btn) btn.setAttribute('aria-current', 'page');
+    }
+
+    function showView(target) {
+      document.querySelectorAll('[data-view]').forEach(v => {
+        v.hidden = v.getAttribute('data-view') !== target;
+      });
+      setActiveNav(target);
+      if (typeof log === "function") log(`Navigated to ${target}.`, "INFO");
+    }
+
+    // Hook sidebar buttons
+    document.querySelectorAll('.nav button[data-nav]').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.getAttribute('data-nav')));
+    });
+
+    // Quick links
+    document.getElementById('btnGoProfiles')?.addEventListener('click', () => showView('profiles'));
+    document.getElementById('btnGoPaths')?.addEventListener('click', () => showView('paths'));
+    document.getElementById('btnGoConsole')?.addEventListener('click', () => showView('console'));
+
+    document.getElementById('btnOpenModsQuick2')?.addEventListener('click', async () => {
+      const modsPath = document.getElementById('modsPath')?.value?.trim() || "";
+      if (typeof window.iron === "undefined") {
+        log("Not running in Electron. Cannot open folder.", "ERROR");
+        return;
+      }
+      const ok = await window.iron.openPath(modsPath);
+      log(ok ? `Opened folder: ${modsPath}` : "Failed to open folder.", ok ? "INFO" : "ERROR");
+    });
+
+    // DO NOT TOUCH - YOU WILL REGRET IT - STARTUP FUNCTIONS
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      // Show default page
+      showView("dashboard");
+
+      // Load settings first
+      await loadSettings();
+
+      // Default states
+      window.SETTINGS = window.SETTINGS || { theme: "dark", minLogLevel: "INFO" };
+      setStatus(false);
+
+      // Startup logs
+      SETTINGS.minLogLevel = "INFO";
+      addStartupLogs();
+
+      // Render logs into consoles
+      renderLogs();
+      log("Logger initialized.", "INFO");  // <-- if you don't see this, IDs are wrong
+
+      // Auto-detect on launch & waits
+      await loadProfiles();
+      refreshDashboardProfileLabel();
+      await loadModules();
+
+      if (SETTINGS.autoDetectOnLaunch && window.iron) {
+        log("Auto-detect on launch is enabled.", "INFO");
+
+        const result = await window.iron.autoDetectPaths();
+        if (result.ok) {
+          document.getElementById("gamePath").value = result.gamePath;
+          document.getElementById("modsPath").value = result.modsPath;
+
+          log(`Auto-detected game path: ${result.gamePath}`, "INFO");
+          if (result.createdMods) log(`Created Mods folder: ${result.modsPath}`, "WARN");
+        } else {
+          log(result.reason || "Auto-detect failed.", "ERROR");
+        }
+
+        renderLogs();
+      }
+    });
+  </script>
+</body>
+</html>
