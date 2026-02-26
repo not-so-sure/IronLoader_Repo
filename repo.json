@@ -5,6 +5,96 @@
         "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
         "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
       }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod1": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod2": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod3": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod4": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod6": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod5": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod7": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod8": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod9": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod11": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod111": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod1111": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod1111111": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
+    },
+        "Working Coffee Machine": {
+      "coffeeMod1111111111111111111": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
     }
   }
 }
