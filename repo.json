@@ -1,8 +1,10 @@
 {
   "LukaSyntax": {
     "Working Coffee Machine": {
-      "coffeeMod.dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
-      "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      "coffeeMod": {
+        "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
+      }
     }
   }
 }
