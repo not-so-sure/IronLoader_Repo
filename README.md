@@ -7,7 +7,7 @@ Fetches repo from json
 ## **You need nodejs for this to work!**
 https://nodejs.org
 
-After installing run these commands in command prompt:
+After installing in the command prompt, run these commands in command prompt:
 
 node -v
 
@@ -16,6 +16,12 @@ npm -v
 You should have strings of numbers outputted
 
 ## Create a new folder somewhere and cd to it
+type:
+
+mkdir ironloader
+
+cd ironloader
+
 then type in the console:
 
 npm init -y
