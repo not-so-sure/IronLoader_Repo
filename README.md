@@ -8,7 +8,7 @@
 
 Open a powershell instance as admin and run these commands in this order:
 1. `powershell -c "irm https://community.chocolatey.org/install.ps1|iex"`
-2. `choco install nodejs --version="24.14.0"`
+2. `choco install nodejs`
 
 After that, you should run:
 
