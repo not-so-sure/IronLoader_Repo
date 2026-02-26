@@ -1,42 +1,28 @@
-# Mods Repositories for IronLoader
-Fetches repo from json
+# Mod loader for Iron Nest game on Steam
+ - https://discord.gg/E92DaqgnZv
+ - https://store.steampowered.com/app/2950790/IRON_NEST_Heavy_Turret_Simulator/
 
- Mod loader for Iron Nest game on [Steam](https://store.steampowered.com/app/2950790/IRON_NEST_Heavy_Turret_Simulator/)
- https://discord.gg/E92DaqgnZv
+## Setup
 
-## **You need nodejs for this to work!**
-https://nodejs.org
+### Windows
 
-After installing in the command prompt, run these commands in command prompt:
+Open a powershell instance and run these commands in this order:
+1. `powershell -c "irm https://community.chocolatey.org/install.ps1|iex"`
+2. `choco install nodejs --version="24.14.0"`
 
-node -v
+After that, you should run:
 
-npm -v
+3. `npm -v`
+4. `node -v`
 
-You should have strings of numbers outputted
+If nothing is returned from either 3 or 4, you did something wrong.
 
-## Create a new folder somewhere and cd to it
-type:
+Next, open a command prompt and run `mkdir ironloader & cd ironloader`
 
-mkdir ironloader
+After than, run `npm init -y`
 
-cd ironloader
+And finally run `npm install electron --save-dev`
 
-then type in the console:
+Copy the path and open it in file explorer. You will need to download and move the files from here on github into the ironloader folder. When it asks you to replace or ignore, tell it to replace, or it will not work properly.
 
-npm init -y
-
-this makes the package.json that you will need to overwrite / replace
-
-Then run:
-
-npm install electron --save-dev
-
-And then paste the downloaded files into the new folder you created.
-
-It should be as simple as running: 
-
-npm start 
-
-
-If this doesnt work, please contact me
+After you do this, return to your command prompt and run `npm start` and you should have the interface open.
