@@ -5,6 +5,13 @@
         "dll": "https://github.com/not-so-sure/IronNest-Working-Coffee/releases/download/Release/coffeeMod.dll",
         "moddata": "https://raw.githubusercontent.com/not-so-sure/IronNest-Working-Coffee/refs/heads/main/moddata.json"
       }
+    },
+    "BlueDuck": {
+    "Unity Explorer": {
+      "UnityExplorer": {
+        "dll": "https://github.com/not-so-sure/BlueDuck-UnityExplorer/releases/download/v.1.0.0/UnityExplorer.dll",
+        "moddata": "https://raw.githubusercontent.com/not-so-sure/BlueDuck-UnityExplorer/refs/heads/main/moddata.json"
+      }
     }
   }
 }
